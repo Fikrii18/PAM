@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "634708531015",
+    "project_id": "entinkost-14af0",
+    "storage_bucket": "entinkost-14af0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:634708531015:android:5a3744a6f67b27f1e79e62",
+        "android_client_info": {
+          "package_name": "com.example.entinkost"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9E_El8mmW9Hqif2FqJA6PFEMYsJf7HbI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:634708531015:android:eb9fb3ab72848792e79e62",
+        "android_client_info": {
+          "package_name": "com.example.kost"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9E_El8mmW9Hqif2FqJA6PFEMYsJf7HbI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
