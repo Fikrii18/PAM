@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Tambahkan import ini untuk FirebaseAuth
-import 'package:kost/kelolapenyewa.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:kost/konfitrmasi.dart';
+import 'package:kost/tambah_kamar.dart';
 import 'package:kost/laporan.dart';
 import 'package:kost/login.dart';
-import 'package:kost/tambah_kamar.dart';
 
 class AdminPage extends StatefulWidget {
   @override
@@ -15,32 +15,36 @@ class _AdminPageState extends State<AdminPage> {
   int _selectedIndex = 0;
 
   // Fungsi untuk navigasi berdasarkan index
-  void _onItemTapped(int index) {
+void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
     // Tindakan sesuai dengan pilihan
     if (index == 0) {
-      // Menampilkan halaman admin tanpa menambahkan ke stack
+      // Navigate to AdminPage
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => AdminPage()),
       );
     } else if (index == 1) {
+      // Navigate to LaporanPage
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LaporanPage()),
       );
     } else if (index == 2) {
+      // Navigate to PemesananPage (current page)
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => PemesananPage()),
       );
     } else if (index == 3) {
+      // Handle logout
       _showLogoutDialog(context);
     }
   }
+
 
   // Ambil koleksi kamar dari Firestore
   Stream<QuerySnapshot> _getKamarList() {
@@ -70,7 +74,7 @@ class _AdminPageState extends State<AdminPage> {
     final noKamarController = TextEditingController(text: currentNoKamar);
     final deskripsiController = TextEditingController(text: currentDeskripsi);
     final hargaController = TextEditingController(text: currentHarga);
-    bool _isAvailable = isAvailable;
+    bool isKamarAvailable = isAvailable;
 
     showDialog(
       context: context,
@@ -96,15 +100,15 @@ class _AdminPageState extends State<AdminPage> {
               ),
               Row(
                 children: [
-                  Checkbox(
-                    value: _isAvailable,
-                    onChanged: (bool? value) {
+                  Text('Tersedia:'),
+                  Switch(
+                    value: isKamarAvailable,
+                    onChanged: (value) {
                       setState(() {
-                        _isAvailable = value ?? true;
+                        isKamarAvailable = value;
                       });
                     },
                   ),
-                  Text('Kamar Tersedia'),
                 ],
               ),
             ],
@@ -121,7 +125,7 @@ class _AdminPageState extends State<AdminPage> {
                     'noKamar': noKamarController.text,
                     'deskripsi': deskripsiController.text,
                     'harga': hargaController.text,
-                    'isAvailable': _isAvailable, // Update availability
+                    'isAvailable': isKamarAvailable, // Pembaruan status isAvailable
                   });
                   Navigator.pop(context);
                   print("Kamar berhasil diperbarui.");
@@ -152,12 +156,11 @@ class _AdminPageState extends State<AdminPage> {
             ),
             TextButton(
               onPressed: () async {
-                // Proses logout dengan FirebaseAuth
                 await FirebaseAuth.instance.signOut();
                 Navigator.pop(context); // Menutup dialog
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginPage()), // Arahkan ke halaman login setelah logout
+                  MaterialPageRoute(builder: (context) => LoginPage()),
                 );
                 print('Berhasil logout');
               },
@@ -207,18 +210,15 @@ class _AdminPageState extends State<AdminPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Harga: $harga'),
-                    Text(isAvailable ? 'Tersedia' : 'Tidak Tersedia'),
                     Text('Deskripsi: $deskripsi'),
+                    Text('Tersedia: ${isAvailable ? 'Ya' : 'Tidak'}'),
                   ],
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () {
-                    _showEditDialog(context, id, noKamar, deskripsi, harga, isAvailable);
-                  },
                 ),
                 onLongPress: () {
                   _deleteKamar(id);
+                },
+                onTap: () {
+                  _showEditDialog(context, id, noKamar, deskripsi, harga, isAvailable);
                 },
               );
             },

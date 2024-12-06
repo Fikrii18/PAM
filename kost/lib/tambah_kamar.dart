@@ -11,7 +11,7 @@ class _TambahKamarPageState extends State<TambahKamarPage> {
   final _noKamarController = TextEditingController();
   final _deskripsiController = TextEditingController();
   final _hargaController = TextEditingController();
-  bool _isAvailable = true;  // Default to available
+  bool isAvailable = true; // Menambahkan status ketersediaan
 
   // Function to save the room data to Firestore
   Future<void> _saveKamar() async {
@@ -26,7 +26,7 @@ class _TambahKamarPageState extends State<TambahKamarPage> {
           'noKamar': noKamar,
           'deskripsi': deskripsi,
           'harga': harga,
-          'isAvailable': _isAvailable,  // Save availability status
+          'isAvailable': isAvailable, // Menyimpan status ketersediaan
         });
 
         // Display success message
@@ -40,28 +40,16 @@ class _TambahKamarPageState extends State<TambahKamarPage> {
           MaterialPageRoute(builder: (context) => AdminPage()),
         );
       } catch (e) {
-        // If there's an error, show an error message
+        // If there's an error, display it
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Terjadi kesalahan: $e')),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Mohon lengkapi semua informasi')),
+        SnackBar(content: Text('Semua field harus diisi')),
       );
     }
-  }
-
-  // Function to cancel and clear form fields
-  void _cancel() {
-    setState(() {
-      _noKamarController.clear();
-      _deskripsiController.clear();
-      _hargaController.clear();
-    });
-
-    // Go back to Admin page without saving
-    Navigator.pop(context);
   }
 
   @override
@@ -75,59 +63,37 @@ class _TambahKamarPageState extends State<TambahKamarPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Input for Room Number
             TextField(
               controller: _noKamarController,
               decoration: InputDecoration(labelText: 'No. Kamar'),
             ),
-            SizedBox(height: 10),
-
-            // Input for Room Description
             TextField(
               controller: _deskripsiController,
               decoration: InputDecoration(labelText: 'Deskripsi'),
               maxLines: 3,
             ),
-            SizedBox(height: 10),
-
-            // Input for Room Price
             TextField(
               controller: _hargaController,
               decoration: InputDecoration(labelText: 'Harga'),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 20),
-
-            // Checkbox to indicate room availability
             Row(
               children: [
-                Checkbox(
-                  value: _isAvailable,
-                  onChanged: (bool? value) {
+                Text('Tersedia:'),
+                Switch(
+                  value: isAvailable,
+                  onChanged: (value) {
                     setState(() {
-                      _isAvailable = value ?? true;
+                      isAvailable = value;
                     });
                   },
                 ),
-                Text('Kamar Tersedia'),
               ],
             ),
-
-            // Buttons for Save and Cancel actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: _cancel,
-                  child: Text('Batal'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                ),
-                ElevatedButton(
-                  onPressed: _saveKamar,
-                  child: Text('Simpan'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                ),
-              ],
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _saveKamar,
+              child: Text('Simpan Kamar'),
             ),
           ],
         ),

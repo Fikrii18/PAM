@@ -24,96 +24,115 @@ class _DetailPageState extends State<DetailPage> {
     _getNamaPenyewa();
   }
 
-void _getNamaPenyewa() async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) {
-    // Handle jika user tidak login
-    print('Tidak ada pengguna yang login');
-    return;
-  }
+  void _getNamaPenyewa() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // Handle jika user tidak login
+      print('Tidak ada pengguna yang login');
+      return;
+    }
 
-  // Ambil nama penyewa dari Firestore menggunakan user ID
-  try {
-    final userDoc = await _firestore.collection('users').doc(user.uid).get();
-    if (userDoc.exists) {
-      // Debugging: Print hasil dari Firestore
-      print('Dokumen ditemukan: ${userDoc.data()}');
+    // Ambil nama penyewa dari Firestore menggunakan user ID
+    try {
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        // Debugging: Print hasil dari Firestore
+        print('Dokumen ditemukan: ${userDoc.data()}');
+        setState(() {
+          _namaPenyewa = userDoc[
+              'name']; // Ambil nama dari field 'name' yang ada di Firestore
+        });
+      } else {
+        print('Dokumen tidak ditemukan di Firestore');
+        setState(() {
+          _namaPenyewa =
+              'Penyewa Tanpa Nama'; // Default jika tidak ada nama di Firestore
+        });
+      }
+    } catch (e) {
+      print('Error mengambil data pengguna: $e');
       setState(() {
-        _namaPenyewa = userDoc['name']; // Ambil nama dari field 'name' yang ada di Firestore
-      });
-    } else {
-      print('Dokumen tidak ditemukan di Firestore');
-      setState(() {
-        _namaPenyewa = 'Penyewa Tanpa Nama'; // Default jika tidak ada nama di Firestore
+        _namaPenyewa = 'Penyewa Tanpa Nama'; // Default error handling
       });
     }
-  } catch (e) {
-    print('Error mengambil data pengguna: $e');
-    setState(() {
-      _namaPenyewa = 'Penyewa Tanpa Nama'; // Default error handling
-    });
-  }
-}
-
-
- void _pesanKamar() async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) {
-    // Handle jika user tidak login
-    return;
   }
 
-  // Ambil data kamar dan durasi sewa
-  final Kamar kamar = widget.kamar;
+  void _pesanKamar() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // Handle jika user tidak login
+      return;
+    }
 
-  // Debugging: Print harga yang diambil dari Firebase
-  print('Harga kamar di Firebase: ${kamar.harga}');
+    // Ambil data kamar dan durasi sewa
+    final Kamar kamar = widget.kamar;
 
-  // Mengganti titik dan koma di harga menjadi format yang valid untuk double
-  String hargaString = kamar.harga.replaceAll(',', '').replaceAll('.', '');
-  final double harga = double.tryParse(hargaString) ?? 0.0; // Jika gagal, set harga ke 0.0
+    // Debugging: Print harga yang diambil dari Firebase
+    print('Harga kamar di Firebase: ${kamar.harga}');
 
-  // Debugging: Print hasil konversi harga
-  print('Harga setelah konversi: $harga');
+    // Mengganti titik dan koma di harga menjadi format yang valid untuk double
+    String hargaString = kamar.harga.replaceAll(',', '').replaceAll('.', '');
+    final double harga =
+        double.tryParse(hargaString) ?? 0.0; // Jika gagal, set harga ke 0.0
 
-  // Pastikan harga sudah benar sebelum melanjutkan
-  if (harga == 0.0) {
-    print('Harga kamar tidak valid!');
-    return; // Jangan lanjutkan jika harga invalid
+    // Debugging: Print hasil konversi harga
+    print('Harga setelah konversi: $harga');
+
+    // Pastikan harga sudah benar sebelum melanjutkan
+    if (harga == 0.0) {
+      print('Harga kamar tidak valid!');
+      return; // Jangan lanjutkan jika harga invalid
+    }
+
+    final int durasi = _durasi; // Durasi sewa dalam hari
+    final double totalHarga = harga * durasi;
+
+    // Debug: Print nilai total harga
+    print('Durasi: $durasi');
+    print('Total Harga: $totalHarga');
+
+    // Ambil nama penyewa yang login dari Firebase (dapatkan nama dari user)
+    final String namaPenyewa = _namaPenyewa ??
+        'Penyewa Tanpa Nama'; // Gunakan nama yang diambil dari Firestore
+
+    // Debugging: Print nama penyewa yang akan disimpan
+    print('Nama Penyewa: $namaPenyewa');
+
+    try {
+      // Simpan pemesanan ke Firestore dengan status default
+      await _firestore.collection('pemesanan').add({
+        'noKamar': kamar.noKamar,
+        'deskripsi': kamar.deskripsi,
+        'durasi': durasi,
+        'totalHarga': totalHarga,
+        'namaPenyewa': namaPenyewa,
+        'userId': user.uid, // ID user yang melakukan pemesanan
+        'status': 'pending', // Status default untuk pemesanan
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // Tampilkan Snackbar setelah berhasil memesan
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Kamar ${kamar.noKamar} berhasil dipesan!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      // Kembali ke halaman utama setelah pemesanan berhasil
+      Navigator.pop(context);
+    } catch (e) {
+      // Tampilkan Snackbar jika terjadi error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Terjadi kesalahan saat memesan kamar.'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
-
-  final int durasi = _durasi;  // Durasi sewa dalam hari
-
-  final double totalHarga = harga * durasi;
-
-  // Debug: Print nilai total harga
-  print('Durasi: $durasi');
-  print('Total Harga: $totalHarga');
-
-  // Ambil nama penyewa yang login dari Firebase (dapatkan nama dari user)
-  final String namaPenyewa = _namaPenyewa ?? 'Penyewa Tanpa Nama'; // Gunakan nama yang diambil dari Firestore
-
-  // Debugging: Print nama penyewa yang akan disimpan
-  print('Nama Penyewa: $namaPenyewa');
-
-  // Simpan pemesanan ke Firestore
-  await _firestore.collection('pemesanan').add({
-    'noKamar': kamar.noKamar,
-    'deskripsi': kamar.deskripsi,
-    'durasi': durasi,
-    'totalHarga': totalHarga,
-    'namaPenyewa': namaPenyewa,
-    'userId': user.uid,  // ID user yang melakukan pemesanan
-    'timestamp': FieldValue.serverTimestamp(),
-  });
-
-  // Kembali ke halaman utama setelah pemesanan berhasil
-  Navigator.pop(context);
-}
-
-
-
-
 
   @override
   Widget build(BuildContext context) {

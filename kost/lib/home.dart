@@ -63,19 +63,34 @@ class HomePage extends StatelessWidget {
             itemCount: kamarList.length,
             itemBuilder: (context, index) {
               final kamar = kamarList[index];
-              return ListTile(
-                title: Text(kamar.noKamar),
-                subtitle: Text(kamar.deskripsi),
-                onTap: () {
-                  // Navigate to DetailPage for room details
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DetailPage(kamar: kamar),
-                    ),
-                  );
-                },
-              );
+              // Cek status isAvailable
+              if (!kamar.isAvailable) {
+                return ListTile(
+                  title: Text(kamar.noKamar),
+                  subtitle: Text(kamar.deskripsi),
+                  trailing: Icon(Icons.lock, color: Colors.red), // Indikator kamar terkunci
+                  onTap: () {
+                    // Tampilkan pesan bahwa kamar sudah dipesan
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Kamar ini sudah dipesan')),
+                    );
+                  },
+                );
+              } else {
+                return ListTile(
+                  title: Text(kamar.noKamar),
+                  subtitle: Text(kamar.deskripsi),
+                  onTap: () {
+                    // Navigate to DetailPage for room details
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailPage(kamar: kamar),
+                      ),
+                    );
+                  },
+                );
+              }
             },
           );
         },
