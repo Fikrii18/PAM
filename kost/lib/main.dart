@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:kost/admin_page.dart';
 import 'package:kost/firebase_options.dart';
 import 'package:kost/home.dart';
 import 'package:kost/login.dart';
