@@ -145,11 +145,11 @@ class _DetailPageState extends State<DetailPage> {
         child: Column(
           children: [
             Text('Deskripsi: ${kamar.deskripsi}'),
-            Text('Harga per hari: ${kamar.harga}'),
+            Text('Harga Bulan: ${kamar.harga}'),
             TextField(
               controller: _durasiController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'Durasi Sewa (hari)'),
+              decoration: InputDecoration(labelText: 'Durasi Sewa (Bulan)'),
               onChanged: (value) {
                 setState(() {
                   _durasi = int.tryParse(value) ?? 1;
@@ -162,6 +162,7 @@ class _DetailPageState extends State<DetailPage> {
                 ? Text('Nama Penyewa: $_namaPenyewa')
                 : CircularProgressIndicator(),
             SizedBox(height: 16.0),
+            const Text('No. Rekening Pemilik : 2331 4553 xxxx xxxx'),
             ElevatedButton(
               onPressed: _pesanKamar,
               child: Text('Pesan Kamar'),

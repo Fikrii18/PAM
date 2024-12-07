@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kost/admin_page.dart';
 import 'package:kost/laporan.dart';
+import 'package:kost/login.dart';
 
 class PemesananPage extends StatefulWidget {
   @override
@@ -80,6 +81,36 @@ class _PemesananPageState extends State<PemesananPage> {
       _showLogoutDialog(context);
     }
   }
+  void _showLogoutDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Logout"),
+        content: Text("Apakah Anda yakin ingin logout?"),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+                (Route<dynamic> route) => false,  // Menghapus semua halaman sebelumnya dari stack
+              );
+            },
+            child: Text("Logout"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
 Future<void> _updateStatusPesanan(String id, Map<String, dynamic> pesanan, String statusBaru) async {
   try {
@@ -239,29 +270,4 @@ Future<void> _updateStatusPesanan(String id, Map<String, dynamic> pesanan, Strin
     );
   }
 
-  // Menampilkan dialog logout
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Keluar'),
-          content: Text('Apakah Anda yakin ingin keluar?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Batal'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-              child: Text('Keluar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

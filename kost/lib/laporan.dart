@@ -129,34 +129,36 @@ class _LaporanPageState extends State<LaporanPage> {
   }
 
   // Dialog untuk Logout
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Logout"),
-          content: Text("Apakah Anda yakin ingin logout?"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("Batal"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                );
-              },
-              child: Text("Logout"),
-            ),
-          ],
-        );
-      },
-    );
-  }
+void _showLogoutDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Logout"),
+        content: Text("Apakah Anda yakin ingin logout?"),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+                (Route<dynamic> route) => false,  // Menghapus semua halaman sebelumnya dari stack
+              );
+            },
+            child: Text("Logout"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -165,154 +167,150 @@ class _LaporanPageState extends State<LaporanPage> {
         title: Text('Laporan'),
         backgroundColor: Colors.blue,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: _printLaporan,
-              child: Text('Cetak Laporan'),
-            ),
-                        ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => InputPengeluaranPage()),
-                );
-              },
-              child: Text('Tambah Pengeluaran'),
-            ),
-            // Menampilkan Data Penyewa dari Firestore
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection(
-                      'penyewa') // Ganti dengan nama koleksi penyewa Anda
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text("Tidak ada data penyewa."));
-                }
+      body: SingleChildScrollView(  // Wrap the entire body with SingleChildScrollView
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              ElevatedButton(
+                onPressed: _printLaporan,
+                child: Text('Cetak Laporan'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => InputPengeluaranPage()),
+                  );
+                },
+                child: Text('Tambah Pengeluaran'),
+              ),
+              // Menampilkan Data Penyewa dari Firestore
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('penyewa') // Ganti dengan nama koleksi penyewa Anda
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(child: Text("Tidak ada data penyewa."));
+                  }
 
-                final penyewaData = snapshot.data!.docs;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Data Penyewa',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: penyewaData.length,
-                      itemBuilder: (context, index) {
-                        var penyewa = penyewaData[index];
-                        return ListTile(
-                          title:
-                              Text('Nama Penyewa: ${penyewa['namaPenyewa']}'),
-                          subtitle: Text('No Kamar: ${penyewa['noKamar']}'),
-                          trailing: Text('Durasi: ${penyewa['durasi']}'),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
-            // Menampilkan Data Pemasukan dari Firestore
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('pemasukan')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text("Tidak ada data pemasukan."));
-                }
+                  final penyewaData = snapshot.data!.docs;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Data Penyewa',
+                        style:
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      ListView.builder(
+                        shrinkWrap: true,  // This ensures the ListView only takes as much space as needed
+                        itemCount: penyewaData.length,
+                        itemBuilder: (context, index) {
+                          var penyewa = penyewaData[index];
+                          return ListTile(
+                            title: Text('Nama Penyewa: ${penyewa['namaPenyewa']}'),
+                            subtitle: Text('No Kamar: ${penyewa['noKamar']}'),
+                            trailing: Text('Durasi: ${penyewa['durasi']}'),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+              // Menampilkan Data Pemasukan dari Firestore
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('pemasukan')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(child: Text("Tidak ada data pemasukan."));
+                  }
 
-                final pemasukanData = snapshot.data!.docs;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Data Pemasukan',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: pemasukanData.length,
-                      itemBuilder: (context, index) {
-                        var pemasukan = pemasukanData[index];
-                        return ListTile(
-                          title:
-                              Text('Nama Penyewa: ${pemasukan['namaPenyewa']}'),
-                          subtitle: Text('No Kamar: ${pemasukan['noKamar']}'),
-                          trailing: Text('Total: ${pemasukan['totalHarga']}'),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
-            StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('pengeluaran')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text("Tidak ada data pengeluaran."));
-                }
+                  final pemasukanData = snapshot.data!.docs;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Data Pemasukan',
+                        style:
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      ListView.builder(
+                        shrinkWrap: true,  // Ensure this list only takes necessary space
+                        itemCount: pemasukanData.length,
+                        itemBuilder: (context, index) {
+                          var pemasukan = pemasukanData[index];
+                          return ListTile(
+                            title: Text('Nama Penyewa: ${pemasukan['namaPenyewa']}'),
+                            subtitle: Text('No Kamar: ${pemasukan['noKamar']}'),
+                            trailing: Text('Total: ${pemasukan['totalHarga']}'),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+              // Menampilkan Data Pengeluaran dari Firestore
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('pengeluaran')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(child: Text("Tidak ada data pengeluaran."));
+                  }
 
-                final pengeluaranData = snapshot.data!.docs;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Data Pengeluaran',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: pengeluaranData.length,
-                      itemBuilder: (context, index) {
-                        var pengeluaran = pengeluaranData[index];
-                        // Mengonversi Timestamp ke DateTime dan memformatnya
-                        Timestamp timestamp =
-                            pengeluaran['tanggal'] as Timestamp;
-                        DateTime date = timestamp.toDate();
-                        String formattedDate =
-                            DateFormat('yyyy-MM-dd').format(date);
-
-                        return ListTile(
-                          title: Text('Tanggal: $formattedDate'),
-                          subtitle: Text(
-                            'Air: ${pengeluaran['air']}, Listrik: ${pengeluaran['listrik']}, Wifi: ${pengeluaran['wifi']}, Lain: ${pengeluaran['lain']}',
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              },
-            )
-          ],
+                  final pengeluaranData = snapshot.data!.docs;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Data Pengeluaran',
+                        style:
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      ListView.builder(
+                        shrinkWrap: true,  // Ensure this list also shrinks as needed
+                        itemCount: pengeluaranData.length,
+                        itemBuilder: (context, index) {
+                          var pengeluaran = pengeluaranData[index];
+                          // Mengonversi Timestamp ke DateTime dan memformatnya
+                          Timestamp timestamp = pengeluaran['tanggal'] as Timestamp;
+                          DateTime date = timestamp.toDate();
+                          String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+                          return ListTile(
+                            title: Text('Tanggal: $formattedDate'),
+                            subtitle: Text(
+                                'Air: ${pengeluaran['air']}, Listrik: ${pengeluaran['listrik']}, WiFi: ${pengeluaran['wifi']}, Lain: ${pengeluaran['lain']}'),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
@@ -322,11 +320,11 @@ class _LaporanPageState extends State<LaporanPage> {
             label: 'Laporan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Pemesanan',
+            icon: Icon(Icons.add),
+            label: 'Tambah',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.exit_to_app),
+            icon: Icon(Icons.logout),
             label: 'Logout',
           ),
         ],

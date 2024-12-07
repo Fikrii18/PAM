@@ -42,6 +42,15 @@ class HomePage extends StatelessWidget {
             },
           ),
         ],
+        leading: IconButton( // Back button to login page
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()), // Navigate to login page when back is pressed
+            );
+          },
+        ),
       ),
       body: FutureBuilder<List<Kamar>>(
         future: _getKamar(),
