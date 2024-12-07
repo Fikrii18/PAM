@@ -12,13 +12,20 @@ class _InputPengeluaranPageState extends State<InputPengeluaranPage> {
   final TextEditingController _wifiController = TextEditingController();
   final TextEditingController _lainController = TextEditingController();
 
+  // Fungsi untuk membersihkan input dan menghilangkan koma jika ada
+  double _parseInput(String input) {
+    // Hapus semua karakter selain angka dan titik desimal
+    input = input.replaceAll(RegExp(r'[^\d.]'), '');
+    return double.tryParse(input) ?? 0.0;
+  }
+
   // Fungsi untuk menyimpan data ke Firebase
   Future<void> _saveData() async {
     final pengeluaran = {
-      'air': double.tryParse(_airController.text) ?? 0.0,
-      'listrik': double.tryParse(_listrikController.text) ?? 0.0,
-      'wifi': double.tryParse(_wifiController.text) ?? 0.0,
-      'lain': double.tryParse(_lainController.text) ?? 0.0,
+      'air': _parseInput(_airController.text),
+      'listrik': _parseInput(_listrikController.text),
+      'wifi': _parseInput(_wifiController.text),
+      'lain': _parseInput(_lainController.text),
       'tanggal': DateTime.now(),
     };
 
@@ -45,22 +52,22 @@ class _InputPengeluaranPageState extends State<InputPengeluaranPage> {
           children: [
             TextField(
               controller: _airController,
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(labelText: 'Pengeluaran Air (Rp)'),
             ),
             TextField(
               controller: _listrikController,
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(labelText: 'Pengeluaran Listrik (Rp)'),
             ),
             TextField(
               controller: _wifiController,
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(labelText: 'Pengeluaran Wifi (Rp)'),
             ),
             TextField(
               controller: _lainController,
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(labelText: 'Pengeluaran Lainnya (Rp)'),
             ),
             SizedBox(height: 20),
