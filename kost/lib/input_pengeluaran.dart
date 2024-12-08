@@ -12,20 +12,13 @@ class _InputPengeluaranPageState extends State<InputPengeluaranPage> {
   final TextEditingController _wifiController = TextEditingController();
   final TextEditingController _lainController = TextEditingController();
 
-  // Fungsi untuk membersihkan input dan menghilangkan koma jika ada
-  double _parseInput(String input) {
-    // Hapus semua karakter selain angka dan titik desimal
-    input = input.replaceAll(RegExp(r'[^\d.]'), '');
-    return double.tryParse(input) ?? 0.0;
-  }
-
   // Fungsi untuk menyimpan data ke Firebase
   Future<void> _saveData() async {
     final pengeluaran = {
-      'air': _parseInput(_airController.text),
-      'listrik': _parseInput(_listrikController.text),
-      'wifi': _parseInput(_wifiController.text),
-      'lain': _parseInput(_lainController.text),
+      'air': double.tryParse(_airController.text) ?? 0.0,
+      'listrik': double.tryParse(_listrikController.text) ?? 0.0,
+      'wifi': double.tryParse(_wifiController.text) ?? 0.0,
+      'lain': double.tryParse(_lainController.text) ?? 0.0,
       'tanggal': DateTime.now(),
     };
 
@@ -43,44 +36,81 @@ class _InputPengeluaranPageState extends State<InputPengeluaranPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Input Pengeluaran'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blueAccent,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _airController,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: 'Pengeluaran Air (Rp)'),
-            ),
-            TextField(
-              controller: _listrikController,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: 'Pengeluaran Listrik (Rp)'),
-            ),
-            TextField(
-              controller: _wifiController,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: 'Pengeluaran Wifi (Rp)'),
-            ),
-            TextField(
-              controller: _lainController,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: 'Pengeluaran Lainnya (Rp)'),
-            ),
-            SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: _saveData,
-                child: Text('Simpan'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTextField(
+                controller: _airController,
+                label: 'Pengeluaran Air (Rp)',
+                icon: Icons.water_drop,
               ),
-            ),
-          ],
+              _buildTextField(
+                controller: _listrikController,
+                label: 'Pengeluaran Listrik (Rp)',
+                icon: Icons.bolt,
+              ),
+              _buildTextField(
+                controller: _wifiController,
+                label: 'Pengeluaran Wifi (Rp)',
+                icon: Icons.wifi,
+              ),
+              _buildTextField(
+                controller: _lainController,
+                label: 'Pengeluaran Lainnya (Rp)',
+                icon: Icons.miscellaneous_services,
+              ),
+              SizedBox(height: 20),
+              Center(
+  child: ElevatedButton(
+    onPressed: _saveData,
+    child: Text('Simpan'),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.blueAccent, // Use backgroundColor instead of primary
+      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(30),
+      ),
+    ),
+  ),
+),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon, color: Colors.blueAccent),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.blueAccent, width: 1),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.blueAccent, width: 2),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.blueAccent, width: 1),
+          ),
         ),
       ),
     );

@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -16,31 +16,30 @@ class _RegisterPageState extends State<RegisterPage> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Fungsi untuk registrasi
+  bool _obscurePassword = true; // Variable to toggle password visibility
+
+  // Function for registration
   Future<void> _register() async {
     try {
-      // Membuat pengguna baru dengan email dan password
       final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
 
-      // Menyimpan data pengguna ke Firestore dengan role 'penyewa'
+      // Save user data to Firestore with role 'penyewa'
       await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
         'name': _nameController.text,
         'phone': _phoneController.text,
         'address': _addressController.text,
         'email': _emailController.text,
-        'role': 'penyewa', // Menetapkan role 'penyewa'
+        'role': 'penyewa', // Assign 'penyewa' role
       });
 
-      // Memberitahu pengguna bahwa registrasi berhasil
-      print("User registered: ${userCredential.user?.email}");
+      // Notify user of successful registration
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Registration Successful!')));
-      Navigator.of(context).pop(); // Kembali ke halaman login
+      Navigator.of(context).pop(); // Return to login page
     } catch (e) {
-      // Menangani error jika registrasi gagal
-      print("Error: $e");
+      // Handle errors during registration
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Registration Failed!')));
     }
   }
@@ -62,7 +61,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo atau gambar bisa ditambahkan di sini
+                // Logo or image can be added here
                 Icon(
                   Icons.account_circle,
                   size: 100,
@@ -151,7 +150,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 // Input Password
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: _obscurePassword, // Use the toggle for password visibility
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: TextStyle(color: Colors.white),
@@ -162,16 +161,27 @@ class _RegisterPageState extends State<RegisterPage> {
                       borderSide: BorderSide.none,
                     ),
                     prefixIcon: Icon(Icons.lock, color: Colors.blue),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.blue,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword; // Toggle password visibility
+                        });
+                      },
+                    ),
                   ),
                   style: TextStyle(color: Colors.black),
                 ),
                 SizedBox(height: 30),
-                // Tombol Register
+                // Register Button
                 ElevatedButton(
                   onPressed: _register,
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-                    backgroundColor: Colors.blueAccent, // Menggunakan backgroundColor
+                    backgroundColor: Colors.blueAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -182,10 +192,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 SizedBox(height: 20),
-                // Tombol untuk login
+                // Login Button
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context); // Kembali ke halaman login
+                    Navigator.pop(context); // Go back to login page
                   },
                   child: Text(
                     "Already have an account? Login here",

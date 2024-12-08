@@ -11,7 +11,7 @@ class _TambahKamarPageState extends State<TambahKamarPage> {
   final _noKamarController = TextEditingController();
   final _deskripsiController = TextEditingController();
   final _hargaController = TextEditingController();
-  bool isAvailable = true; // Menambahkan status ketersediaan
+  bool isAvailable = true; // Status of availability
 
   // Function to save the room data to Firestore
   Future<void> _saveKamar() async {
@@ -26,7 +26,7 @@ class _TambahKamarPageState extends State<TambahKamarPage> {
           'noKamar': noKamar,
           'deskripsi': deskripsi,
           'harga': harga,
-          'isAvailable': isAvailable, // Menyimpan status ketersediaan
+          'isAvailable': isAvailable,
         });
 
         // Display success message
@@ -57,45 +57,71 @@ class _TambahKamarPageState extends State<TambahKamarPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Tambah Kamar'),
+        backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _noKamarController,
-              decoration: InputDecoration(labelText: 'No. Kamar'),
-            ),
-            TextField(
-              controller: _deskripsiController,
-              decoration: InputDecoration(labelText: 'Deskripsi'),
-              maxLines: 3,
-            ),
-            TextField(
-              controller: _hargaController,
-              decoration: InputDecoration(labelText: 'Harga'),
-              keyboardType: TextInputType.number,
-            ),
-            Row(
-              children: [
-                Text('Tersedia:'),
-                Switch(
-                  value: isAvailable,
-                  onChanged: (value) {
-                    setState(() {
-                      isAvailable = value;
-                    });
-                  },
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _noKamarController,
+                decoration: InputDecoration(
+                  labelText: 'No. Kamar',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.hotel),
                 ),
-              ],
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _saveKamar,
-              child: Text('Simpan Kamar'),
-            ),
-          ],
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: _deskripsiController,
+                decoration: InputDecoration(
+                  labelText: 'Deskripsi',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.description),
+                ),
+                maxLines: 3,
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: _hargaController,
+                decoration: InputDecoration(
+                  labelText: 'Harga',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.money),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Tersedia:', style: TextStyle(fontSize: 16)),
+                  Switch(
+                    value: isAvailable,
+                    onChanged: (value) {
+                      setState(() {
+                        isAvailable = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _saveKamar,
+                  child: Text('Simpan Kamar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent, // Updated here
+                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    textStyle: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

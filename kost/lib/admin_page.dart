@@ -14,44 +14,48 @@ class AdminPage extends StatefulWidget {
 class _AdminPageState extends State<AdminPage> {
   int _selectedIndex = 0;
 
-  // Fungsi untuk navigasi berdasarkan index
-void _onItemTapped(int index) {
+  final Map<String, String> imageMap = {
+    'room1': 'assets/images/1.jpg',
+    'room2': 'assets/images/2.jpg',
+    'room3': 'assets/images/3.jpg',
+    'room4': 'assets/images/4.jpg',
+    'room5': 'assets/images/5.jpg',
+  };
+
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
-    // Tindakan sesuai dengan pilihan
-    if (index == 0) {
-      // Navigate to AdminPage
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => AdminPage()),
-      );
-    } else if (index == 1) {
-      // Navigate to LaporanPage
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LaporanPage()),
-      );
-    } else if (index == 2) {
-      // Navigate to PemesananPage (current page)
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => PemesananPage()),
-      );
-    } else if (index == 3) {
-      // Handle logout
-      _showLogoutDialog(context);
+    switch (index) {
+      case 0:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AdminPage()),
+        );
+        break;
+      case 1:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LaporanPage()),
+        );
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PemesananPage()),
+        );
+        break;
+      case 3:
+        _showLogoutDialog(context);
+        break;
     }
   }
 
-
-  // Ambil koleksi kamar dari Firestore
   Stream<QuerySnapshot> _getKamarList() {
     return FirebaseFirestore.instance.collection('kamar').snapshots();
   }
 
-  // Menampilkan halaman tambah kamar
   void _navigateToTambahKamarPage(BuildContext context) {
     Navigator.push(
       context,
@@ -59,7 +63,6 @@ void _onItemTapped(int index) {
     );
   }
 
-  // Menghapus kamar dari Firestore
   void _deleteKamar(String id) async {
     try {
       await FirebaseFirestore.instance.collection('kamar').doc(id).delete();
@@ -69,7 +72,6 @@ void _onItemTapped(int index) {
     }
   }
 
-  // Menampilkan dialog edit kamar
   void _showEditDialog(BuildContext context, String id, String currentNoKamar, String currentDeskripsi, String currentHarga, bool isAvailable) {
     final noKamarController = TextEditingController(text: currentNoKamar);
     final deskripsiController = TextEditingController(text: currentDeskripsi);
@@ -80,22 +82,24 @@ void _onItemTapped(int index) {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit Kamar'),
+          title: Text('Edit Kamar', style: TextStyle(fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: noKamarController,
-                decoration: InputDecoration(labelText: 'No. Kamar'),
+                decoration: InputDecoration(labelText: 'No. Kamar', border: OutlineInputBorder()),
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: deskripsiController,
-                decoration: InputDecoration(labelText: 'Deskripsi'),
+                decoration: InputDecoration(labelText: 'Deskripsi', border: OutlineInputBorder()),
                 maxLines: 3,
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: hargaController,
-                decoration: InputDecoration(labelText: 'Harga'),
+                decoration: InputDecoration(labelText: 'Harga', border: OutlineInputBorder()),
                 keyboardType: TextInputType.number,
               ),
               Row(
@@ -125,7 +129,7 @@ void _onItemTapped(int index) {
                     'noKamar': noKamarController.text,
                     'deskripsi': deskripsiController.text,
                     'harga': hargaController.text,
-                    'isAvailable': isKamarAvailable, // Pembaruan status isAvailable
+                    'isAvailable': isKamarAvailable,
                   });
                   Navigator.pop(context);
                   print("Kamar berhasil diperbarui.");
@@ -141,13 +145,12 @@ void _onItemTapped(int index) {
     );
   }
 
-  // Menampilkan dialog logout
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Keluar'),
+          title: Text('Keluar', style: TextStyle(fontWeight: FontWeight.bold)),
           content: Text('Apakah Anda yakin ingin keluar?'),
           actions: [
             TextButton(
@@ -157,7 +160,7 @@ void _onItemTapped(int index) {
             TextButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
-                Navigator.pop(context); // Menutup dialog
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => LoginPage()),
@@ -176,7 +179,8 @@ void _onItemTapped(int index) {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hallo Admin'),
+        title: Text('Hallo Admin', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.blueAccent,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _getKamarList(),
@@ -195,41 +199,56 @@ void _onItemTapped(int index) {
 
           var kamarList = snapshot.data!.docs;
           return ListView.builder(
-            itemCount: kamarList.length,
-            itemBuilder: (context, index) {
-              var kamar = kamarList[index];
-              var id = kamar.id;
-              var noKamar = kamar['noKamar'];
-              var deskripsi = kamar['deskripsi'];
-              var harga = kamar['harga'];
-              var isAvailable = kamar['isAvailable'];
+  itemCount: kamarList.length,
+  itemBuilder: (context, index) {
+    var kamar = kamarList[index];
+    var id = kamar.id; // Get the room ID from Firestore
+    var noKamar = kamar['noKamar'];
+    var deskripsi = kamar['deskripsi'];
+    var harga = kamar['harga'];
+    var isAvailable = kamar['isAvailable'];
 
-              return ListTile(
-                title: Text(noKamar),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Harga: $harga'),
-                    Text('Deskripsi: $deskripsi'),
-                    Text('Tersedia: ${isAvailable ? 'Ya' : 'Tidak'}'),
-                  ],
-                ),
-                onLongPress: () {
-                  _deleteKamar(id);
-                },
-                onTap: () {
-                  _showEditDialog(context, id, noKamar, deskripsi, harga, isAvailable);
-                },
-              );
-            },
-          );
+    // Ganti bagian ini dengan Image.asset yang menggunakan 'noKamar'
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+      elevation: 4,
+      child: ListTile(
+        contentPadding: EdgeInsets.all(10),
+        leading: Image.asset(
+          'assets/${kamar['noKamar']}.jpg', // Menggunakan noKamar sebagai nama file
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover, // Menjamin gambar menutupi area yang tersedia
+        ),
+        title: Text(noKamar, style: TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 4),
+            Text('Harga: $harga', style: TextStyle(color: Colors.green)),
+            Text('Deskripsi: $deskripsi', style: TextStyle(color: Colors.black54)),
+            Text('Tersedia: ${isAvailable ? 'Ya' : 'Tidak'}', style: TextStyle(color: isAvailable ? Colors.green : Colors.red)),
+          ],
+        ),
+        onLongPress: () {
+          _deleteKamar(id);
+        },
+        onTap: () {
+          _showEditDialog(context, id, noKamar, deskripsi, harga, isAvailable);
+        },
+      ),
+    );
+  },
+);
+
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _navigateToTambahKamarPage(context); // Navigasi ke halaman tambah kamar
+          _navigateToTambahKamarPage(context);
         },
         child: Icon(Icons.add),
+        backgroundColor: Colors.blueAccent,
         tooltip: 'Tambah Kamar',
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -237,22 +256,26 @@ void _onItemTapped(int index) {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home, size: 30),
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.report),
+            icon: Icon(Icons.report, size: 30),
             label: 'Laporan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),
+            icon: Icon(Icons.list, size: 30),
             label: 'Pemesanan',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.exit_to_app),
+            icon: Icon(Icons.exit_to_app, size: 30),
             label: 'Keluar',
           ),
         ],
+        selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }
